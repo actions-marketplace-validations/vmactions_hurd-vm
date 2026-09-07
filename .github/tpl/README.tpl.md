@@ -55,13 +55,12 @@ jobs:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Test in {{VM_NAME}}
       id: test
       uses: {{GITHUB_REPOSITORY}}@{{LATEST_MAJOR}}
       with:
         envs: 'MYTOKEN MYTOKEN2'
-        usesh: true
         prepare: |
           {{VM_PREPARE}}
 
@@ -94,6 +93,8 @@ All the `GITHUB_*` as well as `CI=true` env variables are passed into the VM.
 
 So, you will have the same directory and same default env variables when you `run` the CI script.
 
+The `prepare` and `run` scripts are always executed with `sh` in the VM, whatever the default login shell of the VM is.
+
 {{VM_SHELL_COMMENTS}}
 
 
@@ -122,7 +123,7 @@ The code is shared from the host to the VM via `rsync` by default, you can choos
 You can also set `sync: no`, so the files will not be synced to the  VM.
 
 
-When using `rsync` or `scp`,  you can define `copyback: false` to not copy files back from the VM in to the host.
+When using a copy based sync method (`rsync`, `scp`, `tar` or `9p`), you can define `copyback: false` to not copy files back from the VM to the host. It has no effect on `sshfs` and `nfs`, which are live mounts and never copy back.
 
 
 ```yaml
@@ -236,7 +237,7 @@ Support custom shell:
 ```yaml
 ...
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Start VM
       id: vm
       uses: {{GITHUB_REPOSITORY}}@{{LATEST_MAJOR}}
@@ -267,7 +268,7 @@ You can also use `custom-shell-name` to set a custom name for the shell wrapper:
 ```yaml
 ...
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Start VM
       id: vm
       uses: {{GITHUB_REPOSITORY}}@{{LATEST_MAJOR}}

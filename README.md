@@ -38,9 +38,23 @@ All the supported releases are here:
 
 | Release | x86_64 (amd64) | i386 |
 |---------|---------|---------|
-| 2025 | ✅ (rsync,scp,nfs) | ✅ (rsync,scp,nfs) |
+| 2025 | ✅ (rsync,scp,nfs,tar) | ✅ (rsync,scp,nfs,tar) |
 
 <!-- arch-label: x86_64 = x86_64 (amd64) -->
+
+How the images are built:
+
+Each image is built automatically in the
+[anyvm-org/hurd-builder](https://github.com/anyvm-org/hurd-builder)
+repo's GitHub Actions: it downloads the official Debian GNU/Hurd
+pre-installed disk image, customizes it (serial console, ssh,
+first-boot setup), boots it in QEMU, pre-installs the packages listed
+in the conf, and exports the disk as a compressed qcow2 image. No
+interactive installer is run.
+
+Upstream media: the official Debian GNU/Hurd images from
+https://cdimage.debian.org/cdimage/ports/latest/ (port page:
+https://www.debian.org/ports/hurd/).
 
 
 
@@ -62,13 +76,12 @@ jobs:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Test in Hurd
       id: test
       uses: vmactions/hurd-vm@v1
       with:
         envs: 'MYTOKEN MYTOKEN2'
-        usesh: true
         prepare: |
           apt-get install -y socat
 
@@ -86,7 +99,7 @@ jobs:
 ```
 
 
-The latest major version is: `v1`, which is the most recommended to use. (You can also use the latest full version: `v1.0.0`)  
+The latest major version is: `v1`, which is the most recommended to use. (You can also use the latest full version: `v1.0.1`)  
 
 
 If you are migrating from the previous `v0`, please change the `runs-on: ` to `runs-on: ubuntu-latest`
@@ -105,6 +118,8 @@ All the source code tree in the Host machine are mounted into the VM.
 All the `GITHUB_*` as well as `CI=true` env variables are passed into the VM.
 
 So, you will have the same directory and same default env variables when you `run` the CI script.
+
+The `prepare` and `run` scripts are always executed with `sh` in the VM, whatever the default login shell of the VM is.
 
 
 
@@ -134,7 +149,7 @@ The code is shared from the host to the VM via `rsync` by default, you can choos
 You can also set `sync: no`, so the files will not be synced to the  VM.
 
 
-When using `rsync` or `scp`,  you can define `copyback: false` to not copy files back from the VM in to the host.
+When using a copy based sync method (`rsync`, `scp`, `tar` or `9p`), you can define `copyback: false` to not copy files back from the VM to the host. It has no effect on `sshfs` and `nfs`, which are live mounts and never copy back.
 
 
 ```yaml
@@ -248,7 +263,7 @@ Support custom shell:
 ```yaml
 ...
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Start VM
       id: vm
       uses: vmactions/hurd-vm@v1
@@ -279,7 +294,7 @@ You can also use `custom-shell-name` to set a custom name for the shell wrapper:
 ```yaml
 ...
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Start VM
       id: vm
       uses: vmactions/hurd-vm@v1

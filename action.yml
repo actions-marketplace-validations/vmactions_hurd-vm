@@ -1,10 +1,10 @@
 name: 'Hurd-vm'
-description: 'Run CI in Hurd for GitHub Actions'
+description: 'Test in a real Hurd virtual machine on GitHub Actions -- QEMU-powered, with SSH and two-way folder sync'
 inputs:
   osname:
     description: 'The OS name'
     required: true
-    default: 'Hurd'
+    default: 'hurd'
   prepare:
     description: 'Install some tools before CI runs'
     required: false
@@ -31,13 +31,13 @@ inputs:
     description: 'The NAT ports to Hurd vm'
     required: false
   usesh:
-    description: 'Use sh instead of the default shell. Default is false.'
+    description: 'Deprecated and ignored. The prepare/run scripts are always executed with sh.'
     required: false
   sync:
     description: 'How to synchronize the source code to/from the VM. Default is rsync.'
     required: false
   copyback:
-    description: 'whether or not to copy the build result repo back from the VM to the host Mac OS, defalt is True'
+    description: 'Whether or not to copy the build result repo back from the VM to the host runner. Default is true.'
     required: false
   debug:
     description: 'output debug message'
@@ -74,8 +74,8 @@ outputs:
   cache-after-prepare-hit:
     description: 'true when a prepared VM image cache was restored and the prepare step was skipped, false otherwise.'
 branding:
-  icon: 'activity'
-  color: 'green'
+  icon: 'layers'
+  color: 'gray-dark'
 
 runs:
   using: 'node24'
